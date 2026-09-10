@@ -1,37 +1,44 @@
 # GreenLedger-Desbank-Arbitrum
 
+**EmergentSoft · RWA Tokenization · Arbitrum Track**
+
+## What it is
+
 Arbitrum adaptation of the GreenLedger / Desbank asset-tokenization stack.
 
-- Arbitrum One: `42161`
-- Arbitrum Sepolia: `421614`
-- Arbiscan verification supported
+## Business problem
+
+Enterprise RWA systems need network-specific tokenization infrastructure with verifiable issuance rules, AI attestations and reproducible deployment tooling.
+
+## Capabilities
+
+- Arbitrum One / Arbitrum Sepolia support
 - AI-attestation-gated ERC-20 asset tokenization
-- Invariant: **1 token = 1 registered sqft** with 18 decimals
+- Surface-area / supply invariant enforcement
+- Deployment and verification tooling
 
 ## Architecture
 
-`AIAttestationRegistry` → `GreenLedgerFactory` → `RealEstateToken`
+`AIAttestationRegistry → GreenLedgerFactory → RealEstateToken`
 
 The factory accepts only its configured registry and transfers ownership of each newly created token to the caller. Tokenization requires a matching `(assetId, decisionHash)` attestation and enforces the surface/supply invariant.
 
-## Demo asset
-
-`GL-BUE-001` — 50,000 sqft — 48,500,000 USD — `QAIzero-RWA-v1.0` — risk grade `A`.
+## Evidence policy
 
 The repository contains deployment and verification tooling but **does not claim a live Arbitrum deployment until real contract addresses, transaction hashes and explorer verification are recorded**.
 
-## Quick start
+## Commercial role
 
-```bash
-cp .env.example .env
-forge install OpenZeppelin/openzeppelin-contracts --no-commit
-forge install foundry-rs/forge-std --no-commit
-forge build
-forge test -vv
-```
-
-For Arbitrum Sepolia configure the environment and run `make deploy-sepolia`.
+This network track supports enterprise RWA tokenization and financing workflows where Arbitrum is the selected settlement environment.
 
 ## Separation rule
 
 This repository is independent from the XRPL original and the Base/Ethereum implementation. Do not modify those source lines from the Arbitrum workstream.
+
+## Security & IP
+
+See [`SECURITY.md`](SECURITY.md) and [`LICENSE`](LICENSE). Third-party components remain subject to their respective licenses.
+
+## Owner
+
+Alejandro Lamas — Founder & CEO, EmergentSoft
