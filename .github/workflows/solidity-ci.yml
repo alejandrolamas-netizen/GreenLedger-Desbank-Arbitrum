@@ -1,0 +1,45 @@
+name: GreenLedger Arbitrum Solidity CI
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "test/**"
+      - "script/**"
+      - "foundry.toml"
+      - "remappings.txt"
+      - ".github/workflows/solidity-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "test/**"
+      - "script/**"
+      - "foundry.toml"
+      - "remappings.txt"
+      - ".github/workflows/solidity-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  solidity:
+    name: Foundry build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install pinned Solidity dependencies
+        run: |
+          forge install OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-git
+          forge install foundry-rs/forge-std@v1.9.6 --no-git
+
+      - name: Build contracts
+        run: forge build --sizes
+
+      - name: Run unit and invariant tests
+        run: forge test -vvv
