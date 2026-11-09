@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /// @notice Append-only attestation history with an explicit current-record pointer.
 /// @dev An attestation is evidence metadata; it is not proof of legal title or valuation.
-contract AIAttestationRegistry is Ownable {
+contract AIAttestationRegistry is Ownable2Step {
     struct Attestation {
         bytes32 assetId;
         bytes32 decisionHash;
@@ -24,12 +24,17 @@ contract AIAttestationRegistry is Ownable {
     mapping(address => bool) public authorizedAttesters;
     mapping(bytes32 => uint256) private _assetNonce;
 
+    bool public tokenizationPaused;
+
     error UnauthorizedAttester();
     error AttestationNotFound();
     error AttestationAlreadyRevoked();
     error InvalidExpiry();
+    error InvalidAddress();
+    error InvalidAttestationData();
 
     event AttestorAuthorizationChanged(address indexed account, bool allowed);
+    event TokenizationPauseChanged(bool paused, address indexed operator);
     event AssetAttested(
         bytes32 indexed assetId,
         bytes32 indexed attestationId,
@@ -60,8 +65,15 @@ contract AIAttestationRegistry is Ownable {
     }
 
     function setAuthorizedAttester(address account, bool allowed) external onlyOwner {
+        if (account == address(0)) revert InvalidAddress();
         authorizedAttesters[account] = allowed;
         emit AttestorAuthorizationChanged(account, allowed);
+    }
+
+    /// @notice Emergency control for new tokenizations; existing ERC-20 transfers remain enabled.
+    function setTokenizationPaused(bool paused) external onlyOwner {
+        tokenizationPaused = paused;
+        emit TokenizationPauseChanged(paused, msg.sender);
     }
 
     /// @notice Backward-compatible attestation entry point with no expiry.
@@ -96,6 +108,14 @@ contract AIAttestationRegistry is Ownable {
         uint256 valuation,
         uint256 expiresAt
     ) internal returns (bytes32 attestationId) {
+        if (
+            assetId == bytes32(0) ||
+            decisionHash == bytes32(0) ||
+            bytes(modelVersion).length == 0 ||
+            bytes(riskGrade).length == 0 ||
+            valuation == 0
+        ) revert InvalidAttestationData();
+
         uint256 nonce = ++_assetNonce[assetId];
         attestationId = keccak256(
             abi.encode(assetId, decisionHash, msg.sender, block.chainid, block.timestamp, nonce)
