@@ -39,7 +39,7 @@ def make_config():
 
 
 def make_log(rpc, block=2):
-    topic = "0x" + keccak(text=EVENT_SIGNATURES["AssetTokenCreated"]).hex()
+    topic = "0x" + keccak(EVENT_SIGNATURES["AssetTokenCreated"].encode("utf-8")).hex()
     return {
         "address": "0x" + "11" * 20,
         "blockNumber": hex(block), "blockHash": rpc.hashes[block],
