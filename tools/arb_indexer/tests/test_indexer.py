@@ -1,5 +1,9 @@
 import sqlite3
+import sys
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indexer import Config, EventIndexer, IndexerError, EVENT_SIGNATURES
 from eth_hash.auto import keccak
@@ -75,6 +79,7 @@ class IndexerTests(unittest.TestCase):
         self.rpc.hashes[3] = "0x" + "ee" * 32
         self.rpc.hashes[2] = "0x" + "dd" * 32
         self.rpc.latest = 4
+        self.rpc.logs = []  # replacement chain has no corresponding old log
         result = self.indexer.run_once()
         self.assertEqual(result["indexed_to"], 4)
         self.assertNotEqual(old_hash, self.rpc.hashes[4])
