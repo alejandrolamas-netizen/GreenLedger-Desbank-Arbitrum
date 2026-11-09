@@ -17,7 +17,7 @@ from eth_hash.auto import keccak
 
 LOG = logging.getLogger("greenledger.indexer")
 EVENT_SIGNATURES = {
-    "AssetAttested": "AssetAttested(bytes32,bytes32,string,string,uint256,uint256,address)",
+    "AssetAttested": "AssetAttested(bytes32,bytes32,bytes32,string,string,uint256,uint256,uint256,address)",
     "AssetTokenCreated": "AssetTokenCreated(bytes32,address,address)",
     "AssetTokenized": "AssetTokenized(bytes32,uint256,address)",
 }
