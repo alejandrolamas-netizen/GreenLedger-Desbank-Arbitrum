@@ -186,7 +186,16 @@ class EventIndexer:
         headers = {}
         for number in range(start, end + 1):
             header = self._header(number)
+            if number > start and header["parentHash"].lower() != headers[number - 1]["hash"].lower():
+                raise IndexerError(f"Non-contiguous canonical headers at block {number}; retry the range")
             headers[number] = header
+        if start > self.config.start_block:
+            previous = self.db.execute(
+                "SELECT block_hash FROM blocks WHERE chain_id=? AND block_number=?",
+                (self.config.chain_id, start - 1),
+            ).fetchone()
+            if previous and headers[start]["parentHash"].lower() != previous["block_hash"].lower():
+                raise IndexerError(f"Parent hash mismatch at block {start}; reorg recovery is required")
         with self.db:
             for number, header in headers.items():
                 self.db.execute(
