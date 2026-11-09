@@ -86,9 +86,10 @@ The expected verdict is PASS. Retain the console output and explorer links as ev
 Set the verified contract addresses and deployment block in local environment variables:
 
 ~~~bash
+export ARB_RPC_URL="$ARBITRUM_SEPOLIA_RPC_URL"
 export ARB_CHAIN_ID=421614
 export ARB_CONTRACT_ADDRESSES="$ATTESTATION_ADDRESS,$FACTORY_ADDRESS,$DEMO_TOKEN_ADDRESS"
-export ARB_START_BLOCK=<verified-deployment-block>
+export ARB_START_BLOCK=123456  # Replace with the verified earliest deployment block.
 export ARB_INDEXER_DB=data/arbitrum-sepolia.sqlite3
 ~~~
 
