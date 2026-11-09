@@ -98,7 +98,7 @@ class EventIndexer:
         self.db = db
         self.db.row_factory = sqlite3.Row
         self._init_db()
-        self.topics = { "0x" + keccak(text=sig).hex(): name for name, sig in EVENT_SIGNATURES.items() }
+        self.topics = { "0x" + keccak(sig.encode("utf-8")).hex(): name for name, sig in EVENT_SIGNATURES.items() }
 
     def _init_db(self) -> None:
         self.db.executescript("""
