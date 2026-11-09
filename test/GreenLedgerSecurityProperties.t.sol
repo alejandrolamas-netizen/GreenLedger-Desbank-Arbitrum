@@ -21,13 +21,8 @@ contract GreenLedgerFuzzTest is Test {
         registry.attest(assetId, decisionHash, "QAIzero-RWA-v1", "A", 1);
 
         RealEstateToken token = new RealEstateToken(
-            "GreenLedger Fuzz",
-            "GLF",
-            assetId,
-            keccak256("title"),
-            decisionHash,
-            surfaceSqFt,
-            address(registry)
+            "GreenLedger Fuzz", "GLF", assetId, keccak256("title"),
+            decisionHash, surfaceSqFt, address(registry)
         );
 
         token.executeTokenization(recipient);
@@ -50,19 +45,14 @@ contract GreenLedgerFuzzTest is Test {
     function testFuzzTokenizationRejectsNonMatchingDecision(bytes32 wrongDecisionHash) public {
         bytes32 assetId = keccak256("GL-MISMATCH-ASSET");
         bytes32 validDecisionHash = keccak256("GL-VALID-DECISION");
-        vm.assume(wrongDecisionHash != validDecisionHash);
+        vm.assume(wrongDecisionHash != validDecisionHash && wrongDecisionHash != bytes32(0));
 
         AIAttestationRegistry registry = new AIAttestationRegistry();
         registry.attest(assetId, validDecisionHash, "QAIzero-RWA-v1", "A", 1);
 
         RealEstateToken token = new RealEstateToken(
-            "GreenLedger Mismatch",
-            "GLM",
-            assetId,
-            keccak256("title"),
-            wrongDecisionHash,
-            100,
-            address(registry)
+            "GreenLedger Mismatch", "GLM", assetId, keccak256("title"),
+            wrongDecisionHash, 100, address(registry)
         );
 
         vm.expectRevert(RealEstateToken.AttestationNotFound.selector);
@@ -73,16 +63,23 @@ contract GreenLedgerFuzzTest is Test {
         AIAttestationRegistry registry = new AIAttestationRegistry();
         GreenLedgerFactory factory = new GreenLedgerFactory(address(registry));
 
-        vm.expectRevert(bytes("Invalid registry"));
+        vm.expectRevert(GreenLedgerFactory.InvalidRegistry.selector);
         factory.deployAssetToken(
-            "Invalid",
-            "INV",
-            keccak256("asset"),
-            keccak256("title"),
-            keccak256("decision"),
-            10,
-            address(0xBEEF)
+            "Invalid", "INV", keccak256("asset"), keccak256("title"),
+            keccak256("decision"), 10, address(0xBEEF)
         );
+    }
+
+    function testFactoryRejectsDuplicateAssetId() public {
+        AIAttestationRegistry registry = new AIAttestationRegistry();
+        GreenLedgerFactory factory = new GreenLedgerFactory(address(registry));
+        bytes32 assetId = keccak256("unique-asset");
+        bytes32 decisionHash = keccak256("unique-decision");
+        registry.attest(assetId, decisionHash, "model-v1", "A", 1);
+
+        factory.deployAssetToken("First", "ONE", assetId, keccak256("title"), decisionHash, 1, address(registry));
+        vm.expectRevert(abi.encodeWithSelector(GreenLedgerFactory.AssetAlreadyDeployed.selector, assetId, factory.assetTokenById(assetId)));
+        factory.deployAssetToken("Second", "TWO", assetId, keccak256("title-2"), decisionHash, 1, address(registry));
     }
 }
 
@@ -94,18 +91,14 @@ contract GreenLedgerInvariantHandler {
     }
 
     function tokenize() external {
-        if (!token.isTokenized()) {
-            token.executeTokenization(address(this));
-        }
+        if (!token.isTokenized()) token.executeTokenization(address(this));
     }
 
     function transfer(uint96 rawAmount, address recipient) external {
         if (!token.isTokenized()) return;
         if (recipient == address(0)) recipient = address(0xBEEF);
-
         uint256 balance = token.balanceOf(address(this));
         if (balance == 0) return;
-
         uint256 amount = uint256(rawAmount) % (balance + 1);
         token.transfer(recipient, amount);
     }
@@ -124,13 +117,8 @@ contract GreenLedgerInvariantTest is StdInvariant, Test {
         registry.attest(assetId, decisionHash, "QAIzero-RWA-v1", "A", 1);
 
         token = new RealEstateToken(
-            "GreenLedger Invariant",
-            "GLI",
-            assetId,
-            keccak256("title"),
-            decisionHash,
-            SURFACE_SQ_FT,
-            address(registry)
+            "GreenLedger Invariant", "GLI", assetId, keccak256("title"),
+            decisionHash, SURFACE_SQ_FT, address(registry)
         );
 
         handler = new GreenLedgerInvariantHandler(token);
@@ -143,10 +131,7 @@ contract GreenLedgerInvariantTest is StdInvariant, Test {
     }
 
     function invariantTokenizedSupplyEqualsRegisteredSurface() public view {
-        if (token.isTokenized()) {
-            assertEq(token.totalSupply(), EXPECTED_SUPPLY);
-        } else {
-            assertEq(token.totalSupply(), 0);
-        }
+        if (token.isTokenized()) assertEq(token.totalSupply(), EXPECTED_SUPPLY);
+        else assertEq(token.totalSupply(), 0);
     }
 }
