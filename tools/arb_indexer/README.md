@@ -51,7 +51,7 @@ The primary key on `(chain_id, transaction_hash, log_index)` makes repeated inge
 
 ## Current event signatures
 
-- `AssetAttested(bytes32,bytes32,string,string,uint256,uint256,address)`
+- `AssetAttested(bytes32,bytes32,bytes32,string,string,uint256,uint256,uint256,address)`
 - `AssetTokenCreated(bytes32,address,address)`
 - `AssetTokenized(bytes32,uint256,address)`
 
