@@ -42,8 +42,8 @@ contract GreenLedgerFuzzTest is Test {
         vm.assume(caller != address(this));
         AIAttestationRegistry registry = new AIAttestationRegistry();
 
-        vm.prank(caller);
         vm.expectRevert(AIAttestationRegistry.UnauthorizedAttester.selector);
+        vm.prank(caller);
         registry.attest(bytes32(uint256(1)), bytes32(uint256(2)), "model", "A", 1);
     }
 
