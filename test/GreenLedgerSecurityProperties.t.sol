@@ -78,7 +78,7 @@ contract GreenLedgerFuzzTest is Test {
         registry.attest(assetId, decisionHash, "model-v1", "A", 1);
 
         factory.deployAssetToken("First", "ONE", assetId, keccak256("title"), decisionHash, 1, address(registry));
-        vm.expectRevert(GreenLedgerFactory.AssetAlreadyDeployed.selector);
+        vm.expectRevert(abi.encodeWithSelector(GreenLedgerFactory.AssetAlreadyDeployed.selector, assetId, factory.assetTokenById(assetId)));
         factory.deployAssetToken("Second", "TWO", assetId, keccak256("title-2"), decisionHash, 1, address(registry));
     }
 }
