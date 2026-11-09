@@ -6,7 +6,10 @@ import "../src/GreenLedgerFactory.sol";
 import "../src/AIAttestationRegistry.sol";
 
 contract DeployScript is Script {
+    uint256 internal constant ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
+
     function run() external {
+        require(block.chainid == ARBITRUM_SEPOLIA_CHAIN_ID, "Arbitrum Sepolia only");
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
         console.log("Deployer:", deployer);
