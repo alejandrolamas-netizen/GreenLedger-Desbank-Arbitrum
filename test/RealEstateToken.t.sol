@@ -63,7 +63,7 @@ contract RealEstateTokenTest is Test {
     }
 
     function testFactoryRejectsDuplicateAssetId() public {
-        vm.expectRevert(GreenLedgerFactory.AssetAlreadyDeployed.selector);
+        vm.expectRevert(abi.encodeWithSelector(GreenLedgerFactory.AssetAlreadyDeployed.selector, assetId, address(token)));
         factory.deployAssetToken(
             "Duplicate", "DUP", assetId, keccak256("title-2"),
             decisionHash, 50_000, address(registry)
