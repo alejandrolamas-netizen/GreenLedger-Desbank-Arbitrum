@@ -103,9 +103,13 @@ contract AttestationLifecycleTest is Test {
             DECISION_A, 100, address(registry)
         );
         token.executeTokenization(address(this));
+        RealEstateToken pendingToken = new RealEstateToken(
+            "GreenLedger Pending", "GLN", ASSET, keccak256("title-pending"),
+            DECISION_A, 100, address(registry)
+        );
         registry.setTokenizationPaused(true);
         vm.expectRevert(RealEstateToken.TokenizationPaused.selector);
-        token.executeTokenization(address(0xBEEF));
+        pendingToken.executeTokenization(address(0xBEEF));
         token.transfer(address(0xBEEF), 1 ether);
         assertEq(token.balanceOf(address(0xBEEF)), 1 ether);
         assertTrue(registry.isAttestationValid(id));
