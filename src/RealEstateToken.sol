@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IAIAttestation {
     function isAttested(bytes32 assetId, bytes32 decisionHash) external view returns (bool, address);
+    function tokenizationPaused() external view returns (bool);
 }
 
 contract RealEstateToken is ERC20, Ownable {
@@ -19,6 +20,9 @@ contract RealEstateToken is ERC20, Ownable {
     error AttestationNotFound();
     error InvariantViolation(uint256 expected, uint256 actual);
     error AlreadyTokenized();
+    error InvalidTokenConfiguration();
+    error InvalidRecipient();
+    error TokenizationPaused();
 
     event AssetTokenized(bytes32 indexed assetId, uint256 totalSupply, address indexed attester);
 
@@ -31,6 +35,15 @@ contract RealEstateToken is ERC20, Ownable {
         uint256 _surfaceSqFt,
         address _attestationRegistry
     ) ERC20(name, symbol) Ownable(msg.sender) {
+        if (
+            _assetId == bytes32(0) ||
+            _titleHash == bytes32(0) ||
+            _decisionHash == bytes32(0) ||
+            _surfaceSqFt == 0 ||
+            _attestationRegistry == address(0) ||
+            _attestationRegistry.code.length == 0
+        ) revert InvalidTokenConfiguration();
+
         assetId = _assetId;
         titleHash = _titleHash;
         decisionHash = _decisionHash;
@@ -40,6 +53,9 @@ contract RealEstateToken is ERC20, Ownable {
 
     function executeTokenization(address recipient) external onlyOwner {
         if (isTokenized) revert AlreadyTokenized();
+        if (recipient == address(0)) revert InvalidRecipient();
+        if (attestationRegistry.tokenizationPaused()) revert TokenizationPaused();
+
         (bool valid, address attester) = attestationRegistry.isAttested(assetId, decisionHash);
         if (!valid) revert AttestationNotFound();
 
