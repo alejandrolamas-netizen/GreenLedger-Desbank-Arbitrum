@@ -6,7 +6,10 @@ import "../src/AIAttestationRegistry.sol";
 import "../src/RealEstateToken.sol";
 
 contract VerifyPubliclyScript is Script {
+    uint256 internal constant ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
+
     function run() external view {
+        require(block.chainid == ARBITRUM_SEPOLIA_CHAIN_ID, "Arbitrum Sepolia only");
         address attestationAddress = vm.envAddress("ATTESTATION_ADDRESS");
         address tokenAddress = vm.envAddress("DEMO_TOKEN_ADDRESS");
         AIAttestationRegistry registry = AIAttestationRegistry(attestationAddress);
@@ -21,6 +24,11 @@ contract VerifyPubliclyScript is Script {
         console.log("Total supply:", token.totalSupply());
         console.log("Expected supply:", expectedSupply);
         console.log("Surface invariant:", token.totalSupply() == expectedSupply);
-        console.log("VERDICT:", exists && valid && storedDecisionHash == token.decisionHash() && token.totalSupply() == expectedSupply ? "PASS" : "FAIL");
+        console.log(
+            "VERDICT:",
+            exists && valid && storedDecisionHash == token.decisionHash() && token.totalSupply() == expectedSupply
+                ? "PASS"
+                : "FAIL"
+        );
     }
 }

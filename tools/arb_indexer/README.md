@@ -57,6 +57,16 @@ The primary key on `(chain_id, transaction_hash, log_index)` makes repeated inge
 
 Unknown topics are not queried by the current filter. Governance events are not covered until the contracts emit them and the indexer event inventory is updated.
 
+## Local dashboard
+
+After the indexer has created the SQLite database, start the local read-only dashboard in a second terminal:
+
+~~~bash
+python tools/arb_indexer/dashboard.py
+~~~
+
+Open http://127.0.0.1:8080. The dashboard binds only to loopback, opens the database in SQLite read-only mode and displays the latest indexed block and recent raw events. It is a local prototype, not a hosted service, ABI decoder or alerting system.
+
 ## Safety and limitations
 
 - Chain ID is checked before every indexing cycle.
