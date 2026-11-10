@@ -1,63 +1,60 @@
-# GreenLedger-Desbank-Arbitrum
+# GreenLedger / Desbank — Arbitrum
 
-**EmergentSoft · RWA Tokenization · Arbitrum Track**
+**EmergentSoft · RWA asset-evidence and tokenization-control track**
 
 ## Status
 
-**Network-specific implementation track.**
+**Pre-commercial engineering prototype.** This repository contains the Arbitrum-specific implementation and testnet tooling. It does not establish a live Arbitrum deployment, independent audit, customer deployment, regulated financial service or legal ownership system.
 
-This repository contains the Arbitrum adaptation of the GreenLedger / Desbank asset-tokenization stack.
+## Implemented source scope
 
-## Implemented scope
+- owner-governed, append-only attestation history with expiry and revocation;
+- authorized attestors and two-step registry ownership transfer;
+- emergency pause for new tokenization (existing ERC-20 transfers are not frozen);
+- factory-level uniqueness for non-zero asset IDs;
+- token input validation and attestation-gated ERC-20 tokenization;
+- surface-to-supply invariant;
+- Foundry unit, fuzz and stateful invariant tests;
+- read-only Arbitrum Sepolia event indexer and loopback-only local dashboard;
+- chain-guarded deployment, synthetic demo-seeding and verification scripts.
 
-- Arbitrum One / Arbitrum Sepolia deployment tooling
-- AI-attestation-gated ERC-20 asset tokenization
-- Surface-area / supply invariant enforcement
-- Verification tooling
-- Automated tests
+These are repository and CI milestones, not deployment or audit evidence.
 
 ## Architecture
 
-`AIAttestationRegistry → GreenLedgerFactory → RealEstateToken`
+Real-world asset evidence → AIAttestationRegistry → GreenLedgerFactory → RealEstateToken → read-only event indexing.
 
-The factory uses its configured attestation registry. Tokenization requires a matching `(assetId, decisionHash)` attestation and enforces the configured surface/supply invariant.
+The registry's AI decision metadata is not an independent appraisal, legal opinion or proof of asset title. The title hash is a commitment, not proof that the underlying document is authoritative. The surface-based supply formula is a technical rule, not proof of measured area or entitlement.
 
-## Evidence policy
+## Commercial product definition
 
-The repository contains implementation, deployment and verification tooling but **does not claim a live Arbitrum deployment until real contract addresses, transaction hashes and explorer verification are recorded**.
+The proposed initial offer is enterprise software and implementation services for controlled RWA workflow pilots. Desbank is a proposed workflow/integration layer, not an active liquidity venue.
 
-Source code does not by itself establish a regulated financial service, securities offering, investment product or legal ownership interest.
+- [Commercial product definition](docs/12-commercial-product-definition.md)
+- [Release readiness and risk gates](docs/13-release-readiness-gates.md)
+- [Attestation lifecycle policy](docs/09-attestation-lifecycle-policy.md)
+- [Governance and asset-integrity controls](docs/10-governance-emergency-asset-integrity.md)
+- [Arbitrum observability](docs/08-arbitrum-observability.md)
+- [Arbitrum Sepolia runbook](docs/11-arbitrum-sepolia-runbook.md)
 
-## Separation rule
+## Known limitations
 
-This repository is independent from the XRPL original and the Base/Ethereum implementation. Changes to one network track should not be represented as changes to another.
+- no live contract addresses, transaction hashes or explorer verification are recorded here;
+- no independent security audit has been completed;
+- the indexer stores raw logs for a limited event set; full ABI decoding and complete governance-event coverage are not implemented;
+- the dashboard is local-only, not hosted and not an alerting service;
+- registry ownership remains a privileged role; Ownable2Step is not a multisig or timelock;
+- valuation metadata does not currently encode currency, unit or scale;
+- customer-specific legal, privacy, compliance and operational requirements remain to be assessed.
 
-## Production hardening
+## Network separation
 
-Before production financial use, validate:
-
-- attestation history/versioning and revocation;
-- model and decision provenance;
-- authorized attestors and two-step registry ownership transfer;
-- upgrade/admin controls;
-- token supply invariants and global asset-ID uniqueness;
-- emergency pause for new tokenization (existing transfers remain enabled);
-- deployment verification and independent security review;
-- legal and regulatory requirements for the intended jurisdiction and asset.
-
-## Commercial role
-
-This network track supports technical RWA tokenization workflows where Arbitrum is the selected settlement environment.
+This repository is independent from the Ethereum/Base and XRPL workstreams. A test, deployment or security result on one network is not evidence for another.
 
 ## Security & IP
 
-See `SECURITY.md` and `LICENSE`.
+See SECURITY.md and LICENSE. Production financial use requires independent security review and customer-specific legal/regulatory assessment.
 
 ## Owner
 
-Alejandro Lamas — Founder & CEO, EmergentSoft
-
-
-## Current hardening implementation
-
-The repository now includes versioned attestations, revocation and expiry controls, Foundry fuzz/invariant tests, a read-only Arbitrum Sepolia event indexer, two-step registry ownership transfer, an emergency pause for new tokenization, factory-level asset-ID uniqueness and input validation. These controls are source-code and CI milestones; they are not evidence of a live deployment, an independent audit or regulatory approval. See [governance and asset-integrity controls](docs/10-governance-emergency-asset-integrity.md) and [Arbitrum observability](docs/08-arbitrum-observability.md).
+EmergentSoft
