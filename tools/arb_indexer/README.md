@@ -52,10 +52,13 @@ The primary key on `(chain_id, transaction_hash, log_index)` makes repeated inge
 ## Current event signatures
 
 - `AssetAttested(bytes32,bytes32,bytes32,string,string,uint256,uint256,uint256,address)`
+- `AttestorAuthorizationChanged(address,bool)`
+- `AttestationRevoked(bytes32,bytes32,address,bytes32,uint256)`
 - `AssetTokenCreated(bytes32,address,address)`
 - `AssetTokenized(bytes32,uint256,address)`
+- `TokenizationPauseChanged(bool,address)`
 
-Unknown topics are not queried by the current filter. Governance events are not covered until the contracts emit them and the indexer event inventory is updated.
+The indexer records these events as raw topics/data and labels them by event signature. It does not yet decode ABI arguments into typed columns.
 
 ## Local dashboard
 
