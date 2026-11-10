@@ -38,13 +38,13 @@ def make_config():
                   ("0x" + "11" * 20,), 1)
 
 
-def make_log(rpc, block=2):
-    topic = "0x" + keccak(EVENT_SIGNATURES["AssetTokenCreated"].encode("utf-8")).hex()
+def make_log(rpc, block=2, event_name="AssetTokenCreated", log_index=0):
+    topic = "0x" + keccak(EVENT_SIGNATURES[event_name].encode("utf-8")).hex()
     return {
         "address": "0x" + "11" * 20,
         "blockNumber": hex(block), "blockHash": rpc.hashes[block],
-        "transactionHash": "0x" + "ab" * 32,
-        "transactionIndex": "0x0", "logIndex": "0x0",
+        "transactionHash": "0x" + f"{log_index + 171:064x}",
+        "transactionIndex": "0x0", "logIndex": hex(log_index),
         "topics": [topic], "data": "0x",
     }
 
@@ -71,6 +71,23 @@ class IndexerTests(unittest.TestCase):
         self.assertEqual(count2, 1)
         self.assertEqual(second["logs_seen"], 0)
 
+    def test_indexes_registry_governance_events(self):
+        event_names = [
+            "AttestorAuthorizationChanged",
+            "AttestationRevoked",
+            "TokenizationPauseChanged",
+        ]
+        self.rpc.logs = [
+            make_log(self.rpc, event_name=name, log_index=index)
+            for index, name in enumerate(event_names)
+        ]
+        result = self.indexer.run_once()
+        self.assertEqual(result["logs_seen"], 3)
+        stored = {
+            row[0] for row in self.db.execute("SELECT event_name FROM events").fetchall()
+        }
+        self.assertEqual(stored, set(event_names))
+
     def test_reorg_rolls_back_to_common_ancestor(self):
         self.rpc.logs = [make_log(self.rpc)]
         self.indexer.run_once()
@@ -79,7 +96,7 @@ class IndexerTests(unittest.TestCase):
         self.rpc.hashes[3] = "0x" + "ee" * 32
         self.rpc.hashes[2] = "0x" + "dd" * 32
         self.rpc.latest = 4
-        self.rpc.logs = []  # replacement chain has no corresponding old log
+        self.rpc.logs = []
         result = self.indexer.run_once()
         self.assertEqual(result["indexed_to"], 4)
         self.assertNotEqual(old_hash, self.rpc.hashes[4])
