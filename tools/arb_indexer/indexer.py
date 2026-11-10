@@ -18,8 +18,11 @@ from eth_hash.auto import keccak
 LOG = logging.getLogger("greenledger.indexer")
 EVENT_SIGNATURES = {
     "AssetAttested": "AssetAttested(bytes32,bytes32,bytes32,string,string,uint256,uint256,uint256,address)",
+    "AttestorAuthorizationChanged": "AttestorAuthorizationChanged(address,bool)",
+    "AttestationRevoked": "AttestationRevoked(bytes32,bytes32,address,bytes32,uint256)",
     "AssetTokenCreated": "AssetTokenCreated(bytes32,address,address)",
     "AssetTokenized": "AssetTokenized(bytes32,uint256,address)",
+    "TokenizationPauseChanged": "TokenizationPauseChanged(bool,address)",
 }
 
 
@@ -98,7 +101,7 @@ class EventIndexer:
         self.db = db
         self.db.row_factory = sqlite3.Row
         self._init_db()
-        self.topics = { "0x" + keccak(sig.encode("utf-8")).hex(): name for name, sig in EVENT_SIGNATURES.items() }
+        self.topics = {"0x" + keccak(sig.encode("utf-8")).hex(): name for name, sig in EVENT_SIGNATURES.items()}
 
     def _init_db(self) -> None:
         self.db.executescript("""
